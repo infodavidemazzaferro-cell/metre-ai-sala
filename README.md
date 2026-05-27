@@ -1,1 +1,5 @@
-# metre-ai-sala
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

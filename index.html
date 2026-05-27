@@ -10,41 +10,39 @@ body { font-family: system-ui, sans-serif; background: #F4ECDD; color: #2A2018; 
 header { background: #2F3A2A; color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
 h1 { font-size: 18px; font-weight: 700; }
 .turni { display: flex; gap: 8px; }
-.btn-turno { background: rgba(255,255,255,.2); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.btn-turno { background: rgba(255,255,255,.2); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 .btn-turno.active { background: #C2913B; }
 .toolbar { background: #FBF6EC; border-bottom: 1px solid #DCCDB2; padding: 10px 18px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
-.btn-tool { background: #2F3A2A; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.btn-tool { background: #2F3A2A; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 .btn-tool.edit-mode { background: #BC5A37; }
 .btn-tool.secondary { background: #DCCDB2; color: #2A2018; }
 .canvas-wrap { flex: 1; overflow: auto; position: relative; }
-#canvas { position: relative; width: 1200px; height: 800px; background: #E8DCC8; background-image: radial-gradient(circle, #C8B89A 1px, transparent 1px); background-size: 40px 40px; }
-.zona-bg { position: absolute; border-radius: 12px; border: 2px dashed; opacity: .5; pointer-events: none; }
-.zona-label-map { position: absolute; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .8; pointer-events: none; }
-.tavolo { position: absolute; width: 80px; height: 80px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px solid; font-size: 13px; font-weight: 700; transition: box-shadow .15s; user-select: none; }
+#canvas { position: relative; width: 1400px; height: 900px; background: #E8DCC8; background-image: radial-gradient(circle, #C8B89A 1px, transparent 1px); background-size: 40px 40px; }
+.zona-bg { position: absolute; border-radius: 14px; border: 2px dashed; opacity: .5; pointer-events: none; }
+.zona-label-map { position: absolute; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .8; pointer-events: none; }
+.tavolo { position: absolute; width: 110px; height: 110px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid; font-size: 15px; font-weight: 800; transition: box-shadow .15s; user-select: none; touch-action: none; }
 .tavolo.libero { background: #D4E4CE; border-color: #42513C; color: #42513C; }
 .tavolo.occupato { background: #F5D5C8; border-color: #BC5A37; color: #BC5A37; }
 .tavolo.non-disp { background: #EBEBEB; border-color: #9A9A9A; color: #9A9A9A; }
-.tavolo.selected { box-shadow: 0 0 0 3px #C2913B; }
-.tavolo:hover { box-shadow: 0 4px 12px rgba(0,0,0,.2); }
-.posti { font-size: 10px; font-weight: 400; margin-top: 2px; }
-.nome-breve { font-size: 9px; margin-top: 1px; opacity: .85; }
-.stats { background: #FBF6EC; border-top: 1px solid #DCCDB2; padding: 8px 18px; display: flex; gap: 20px; flex-shrink: 0; flex-wrap: wrap; }
-.stat { font-size: 12px; }
-.stat strong { font-size: 16px; font-weight: 800; }
+.tavolo:active { box-shadow: 0 8px 24px rgba(0,0,0,.3); transform: scale(1.05); }
+.posti { font-size: 12px; font-weight: 400; margin-top: 3px; }
+.nome-breve { font-size: 11px; margin-top: 2px; opacity: .85; }
+.stats { background: #FBF6EC; border-top: 1px solid #DCCDB2; padding: 10px 18px; display: flex; gap: 20px; flex-shrink: 0; flex-wrap: wrap; }
+.stat { font-size: 13px; }
+.stat strong { font-size: 18px; font-weight: 800; }
 .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
 .modal.open { display: flex; }
-.modal-box { background: #FBF6EC; border-radius: 16px; padding: 22px; width: 100%; max-width: 320px; max-height: 90vh; overflow-y: auto; }
+.modal-box { background: #FBF6EC; border-radius: 16px; padding: 22px; width: 100%; max-width: 340px; max-height: 90vh; overflow-y: auto; }
 .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
 .field { margin-bottom: 10px; }
 .field label { font-size: 12px; font-weight: 600; color: #42513C; display: block; margin-bottom: 3px; }
-.field input, .field select { width: 100%; padding: 8px 11px; border: 1px solid #DCCDB2; border-radius: 8px; font-size: 14px; font-family: inherit; background: #F4ECDD; }
+.field input, .field select { width: 100%; padding: 10px 12px; border: 1px solid #DCCDB2; border-radius: 8px; font-size: 15px; font-family: inherit; background: #F4ECDD; }
 .btns { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-.btn { flex: 1; padding: 9px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; min-width: 70px; }
+.btn { flex: 1; padding: 11px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; min-width: 80px; }
 .btn-cancel { background: #DCCDB2; color: #2A2018; }
 .btn-save { background: #42513C; color: #fff; }
 .btn-free { background: #BC5A37; color: #fff; }
-.btn-danger { background: #BC5A37; color: #fff; }
-.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
 </style>
 </head>
 <body>
@@ -59,7 +57,7 @@ h1 { font-size: 18px; font-weight: 700; }
 
 <div class="toolbar">
   <button class="btn-tool" id="btn-edit" onclick="toggleEdit()">✏️ Modifica layout</button>
-  <span id="edit-hint" style="font-size:12px;color:#8A7E6C;display:none">Trascina i tavoli per posizionarli</span>
+  <span id="edit-hint" style="font-size:13px;color:#8A7E6C;display:none">✋ Tieni premuto e trascina</span>
   <button class="btn-tool secondary" id="btn-save-layout" onclick="saveLayout()" style="display:none">💾 Salva layout</button>
 </div>
 
@@ -77,36 +75,36 @@ h1 { font-size: 18px; font-weight: 700; }
 </div>
 
 <script>
-const GRID = 40;
+const GRID = 20;
 
 const DEFAULT_TAVOLI = [
   {id:"T1",posti:2,zona:"Sala",x:40,y:80},
-  {id:"T2",posti:2,zona:"Sala",x:140,y:80,nonDisp:true},
-  {id:"T3",posti:4,zona:"Sala",x:240,y:80},
-  {id:"T4",posti:4,zona:"Sala",x:360,y:80},
-  {id:"T5",posti:2,zona:"Sala",x:480,y:80},
-  {id:"T6",posti:4,zona:"Sala",x:580,y:80},
-  {id:"T7",posti:4,zona:"Sala",x:700,y:80},
-  {id:"T8",posti:2,zona:"Sala",x:820,y:80},
-  {id:"T9",posti:4,zona:"Sala",x:40,y:200},
-  {id:"T10",posti:4,zona:"Sala",x:160,y:200},
-  {id:"T11",posti:2,zona:"Sala",x:280,y:200},
-  {id:"T12",posti:4,zona:"Sala",x:380,y:200},
-  {id:"T13",posti:4,zona:"Sala",x:500,y:200},
-  {id:"T15",posti:2,zona:"Sala",x:620,y:200},
-  {id:"T19",posti:4,zona:"Saletta",x:40,y:400},
-  {id:"T20",posti:2,zona:"Saletta",x:160,y:400},
-  {id:"T21",posti:4,zona:"Saletta",x:260,y:400},
-  {id:"T22",posti:4,zona:"Saletta",x:380,y:400},
-  {id:"T23",posti:2,zona:"Saletta",x:500,y:400},
-  {id:"T24",posti:4,zona:"Saletta",x:600,y:400},
-  {id:"T25",posti:4,zona:"Saletta",x:720,y:400},
-  {id:"T26",posti:2,zona:"Saletta",x:40,y:520},
-  {id:"T27",posti:4,zona:"Saletta",x:140,y:520},
-  {id:"T28",posti:4,zona:"Saletta",x:260,y:520},
-  {id:"T29",posti:2,zona:"Saletta",x:380,y:520},
-  {id:"T30",posti:4,zona:"Saletta",x:480,y:520},
-  {id:"T31",posti:4,zona:"Saletta",x:600,y:520},
+  {id:"T2",posti:2,zona:"Sala",x:180,y:80,nonDisp:true},
+  {id:"T3",posti:4,zona:"Sala",x:320,y:80},
+  {id:"T4",posti:4,zona:"Sala",x:460,y:80},
+  {id:"T5",posti:2,zona:"Sala",x:600,y:80},
+  {id:"T6",posti:4,zona:"Sala",x:740,y:80},
+  {id:"T7",posti:4,zona:"Sala",x:880,y:80},
+  {id:"T8",posti:2,zona:"Sala",x:40,y:220},
+  {id:"T9",posti:4,zona:"Sala",x:180,y:220},
+  {id:"T10",posti:4,zona:"Sala",x:320,y:220},
+  {id:"T11",posti:2,zona:"Sala",x:460,y:220},
+  {id:"T12",posti:4,zona:"Sala",x:600,y:220},
+  {id:"T13",posti:4,zona:"Sala",x:740,y:220},
+  {id:"T15",posti:2,zona:"Sala",x:880,y:220},
+  {id:"T19",posti:4,zona:"Saletta",x:40,y:440},
+  {id:"T20",posti:2,zona:"Saletta",x:180,y:440},
+  {id:"T21",posti:4,zona:"Saletta",x:320,y:440},
+  {id:"T22",posti:4,zona:"Saletta",x:460,y:440},
+  {id:"T23",posti:2,zona:"Saletta",x:600,y:440},
+  {id:"T24",posti:4,zona:"Saletta",x:740,y:440},
+  {id:"T25",posti:4,zona:"Saletta",x:880,y:440},
+  {id:"T26",posti:2,zona:"Saletta",x:40,y:580},
+  {id:"T27",posti:4,zona:"Saletta",x:180,y:580},
+  {id:"T28",posti:4,zona:"Saletta",x:320,y:580},
+  {id:"T29",posti:2,zona:"Saletta",x:460,y:580},
+  {id:"T30",posti:4,zona:"Saletta",x:600,y:580},
+  {id:"T31",posti:4,zona:"Saletta",x:740,y:580},
 ];
 
 const ZONE_COLORS = {
@@ -149,7 +147,7 @@ function toggleEdit() {
 
 function saveLayout() {
   localStorage.setItem('metre_tavoli', JSON.stringify(tavoli));
-  alert('Layout salvato!');
+  alert('✅ Layout salvato!');
 }
 
 function savePren() {
@@ -164,15 +162,14 @@ function render() {
   const canvas = document.getElementById('canvas');
   canvas.innerHTML = '';
 
-  // Zone backgrounds
   const zone = {};
   tavoli.forEach(t => {
     if(!zone[t.zona]) zone[t.zona] = {minX:9999,minY:9999,maxX:0,maxY:0};
     const z = zone[t.zona];
-    z.minX = Math.min(z.minX, t.x - 16);
-    z.minY = Math.min(z.minY, t.y - 30);
-    z.maxX = Math.max(z.maxX, t.x + 96);
-    z.maxY = Math.max(z.maxY, t.y + 96);
+    z.minX = Math.min(z.minX, t.x - 20);
+    z.minY = Math.min(z.minY, t.y - 36);
+    z.maxX = Math.max(z.maxX, t.x + 130);
+    z.maxY = Math.max(z.maxY, t.y + 130);
   });
 
   Object.entries(zone).forEach(([nome, z]) => {
@@ -183,12 +180,11 @@ function render() {
     canvas.appendChild(bg);
     const lbl = document.createElement('div');
     lbl.className = 'zona-label-map';
-    lbl.style.cssText = `left:${z.minX+10}px;top:${z.minY+8}px;color:${zc.text};font-size:11px;font-weight:800;`;
+    lbl.style.cssText = `left:${z.minX+12}px;top:${z.minY+10}px;color:${zc.text};`;
     lbl.textContent = nome.toUpperCase();
     canvas.appendChild(lbl);
   });
 
-  // Tavoli
   tavoli.forEach(t => {
     const p = getTavoloPren(t.id);
     const div = document.createElement('div');
@@ -201,78 +197,64 @@ function render() {
     div.innerHTML = `<span>${t.id}</span><span class="posti">${t.posti}p</span>${p&&!t.nonDisp?`<span class="nome-breve">${p.nome.split(' ')[0]}</span>`:''}`;
 
     if(editMode) {
-      div.addEventListener('mousedown', e => startDrag(e, t.id));
-      div.addEventListener('touchstart', e => startDragTouch(e, t.id), {passive:false});
+      div.addEventListener('touchstart', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const touch = e.touches[0];
+        const canvas = document.getElementById('canvas');
+        const rect = canvas.getBoundingClientRect();
+        const wrap = canvas.parentElement;
+        dragging = t.id;
+        dragOffX = touch.clientX - rect.left + wrap.scrollLeft - t.x;
+        dragOffY = touch.clientY - rect.top + wrap.scrollTop - t.y;
+      }, {passive:false});
+      div.addEventListener('mousedown', e => {
+        e.preventDefault();
+        const canvas = document.getElementById('canvas');
+        const rect = canvas.getBoundingClientRect();
+        const wrap = canvas.parentElement;
+        dragging = t.id;
+        dragOffX = e.clientX - rect.left + wrap.scrollLeft - t.x;
+        dragOffY = e.clientY - rect.top + wrap.scrollTop - t.y;
+      });
     } else {
       div.addEventListener('click', () => openModal(t.id));
     }
     canvas.appendChild(div);
   });
 
+  document.getElementById('canvas').addEventListener('touchmove', e => {
+    if(!dragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const canvas = document.getElementById('canvas');
+    const rect = canvas.getBoundingClientRect();
+    const wrap = canvas.parentElement;
+    const nx = snap(touch.clientX - rect.left + wrap.scrollLeft - dragOffX);
+    const ny = snap(touch.clientY - rect.top + wrap.scrollTop - dragOffY);
+    const tv = tavoli.find(x=>x.id===dragging);
+    tv.x = Math.max(0, Math.min(1280, nx));
+    tv.y = Math.max(0, Math.min(780, ny));
+    render();
+  }, {passive:false});
+
   renderStats();
 }
 
-function startDrag(e, id) {
-  if(!editMode) return;
-  e.preventDefault();
-  const t = tavoli.find(x=>x.id===id);
-  dragging = id;
-  dragOffX = e.clientX - t.x;
-  dragOffY = e.clientY - t.y;
-  document.addEventListener('mousemove', onDrag);
-  document.addEventListener('mouseup', stopDrag);
-}
-
-function startDragTouch(e, id) {
-  if(!editMode) return;
-  e.preventDefault();
-  const touch = e.touches[0];
-  const t = tavoli.find(x=>x.id===id);
-  const canvas = document.getElementById('canvas');
-  const rect = canvas.getBoundingClientRect();
-  const wrap = canvas.parentElement;
-  dragging = id;
-  dragOffX = touch.clientX - rect.left - t.x + wrap.scrollLeft;
-  dragOffY = touch.clientY - rect.top - t.y + wrap.scrollTop;
-  document.addEventListener('touchmove', onDragTouch, {passive:false});
-  document.addEventListener('touchend', stopDrag);
-}
-
-function onDrag(e) {
-  if(!dragging) return;
+document.addEventListener('mouseup', () => dragging = null);
+document.addEventListener('touchend', () => dragging = null);
+document.addEventListener('mousemove', e => {
+  if(!dragging || !editMode) return;
   const canvas = document.getElementById('canvas');
   const rect = canvas.getBoundingClientRect();
   const wrap = canvas.parentElement;
   const nx = snap(e.clientX - rect.left + wrap.scrollLeft - dragOffX);
   const ny = snap(e.clientY - rect.top + wrap.scrollTop - dragOffY);
-  const t = tavoli.find(x=>x.id===dragging);
-  t.x = Math.max(0, Math.min(1120, nx));
-  t.y = Math.max(0, Math.min(720, ny));
+  const tv = tavoli.find(x=>x.id===dragging);
+  tv.x = Math.max(0, Math.min(1280, nx));
+  tv.y = Math.max(0, Math.min(780, ny));
   render();
-}
-
-function onDragTouch(e) {
-  if(!dragging) return;
-  e.preventDefault();
-  const touch = e.touches[0];
-  const canvas = document.getElementById('canvas');
-  const rect = canvas.getBoundingClientRect();
-  const wrap = canvas.parentElement;
-  const nx = snap(touch.clientX - rect.left + wrap.scrollLeft - dragOffX);
-  const ny = snap(touch.clientY - rect.top + wrap.scrollTop - dragOffY);
-  const t = tavoli.find(x=>x.id===dragging);
-  t.x = Math.max(0, Math.min(1120, nx));
-  t.y = Math.max(0, Math.min(720, ny));
-  render();
-}
-
-function stopDrag() {
-  dragging = null;
-  document.removeEventListener('mousemove', onDrag);
-  document.removeEventListener('mouseup', stopDrag);
-  document.removeEventListener('touchmove', onDragTouch);
-  document.removeEventListener('touchend', stopDrag);
-}
+});
 
 function renderStats() {
   const liberi = tavoli.filter(t=>!t.nonDisp&&!getTavoloPren(t.id)).length;
@@ -281,8 +263,8 @@ function renderStats() {
   document.getElementById('stats').innerHTML = `
     <div class="stat"><strong style="color:#42513C">${liberi}</strong> Liberi</div>
     <div class="stat"><strong style="color:#BC5A37">${occupati}</strong> Occupati</div>
-    <div class="stat"><strong style="color:#C2913B">${coperti}</strong> Coperti prenotati</div>
-    <div class="stat"><strong>${tavoli.length}</strong> Tavoli totali</div>
+    <div class="stat"><strong style="color:#C2913B">${coperti}</strong> Coperti</div>
+    <div class="stat"><strong>${tavoli.length}</strong> Totali</div>
   `;
 }
 
@@ -290,7 +272,6 @@ function openModal(id) {
   if(editMode) return;
   const t = tavoli.find(x=>x.id===id);
   const p = getTavoloPren(id);
-  const modal = document.getElementById('modal');
   const title = document.getElementById('modal-title');
   const body = document.getElementById('modal-body');
   title.textContent = `${t.id} — ${t.posti}p — ${t.zona}`;
@@ -324,7 +305,7 @@ function openModal(id) {
         <button class="btn btn-save" onclick="prenota('${id}')">Prenota</button>
       </div>`;
   }
-  modal.classList.add('open');
+  document.getElementById('modal').classList.add('open');
 }
 
 function closeModal() { document.getElementById('modal').classList.remove('open'); }

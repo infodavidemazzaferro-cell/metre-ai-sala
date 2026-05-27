@@ -17,7 +17,7 @@ h1 { font-size: 18px; font-weight: 700; }
 .btn-tool.edit-mode { background: #BC5A37; }
 .btn-tool.secondary { background: #DCCDB2; color: #2A2018; }
 .canvas-wrap { flex: 1; overflow: auto; position: relative; }
-#canvas { position: relative; width: 1400px; height: 900px; background: #E8DCC8; background-image: radial-gradient(circle, #C8B89A 1px, transparent 1px); background-size: 40px 40px; }
+#canvas { position: relative; width: 1500px; height: 700px; background: #E8DCC8; background-image: radial-gradient(circle, #C8B89A 1px, transparent 1px); background-size: 40px 40px; }
 .zona-bg { position: absolute; border-radius: 14px; border: 2px dashed; opacity: .5; pointer-events: none; }
 .zona-label-map { position: absolute; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .8; pointer-events: none; }
 .tavolo { position: absolute; width: 110px; height: 110px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid; font-size: 15px; font-weight: 800; transition: box-shadow .15s; user-select: none; touch-action: none; }
@@ -43,6 +43,7 @@ h1 { font-size: 18px; font-weight: 700; }
 .btn-save { background: #42513C; color: #fff; }
 .btn-free { background: #BC5A37; color: #fff; }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.divisore { position: absolute; top: 40px; bottom: 40px; width: 3px; background: #C8B89A; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -62,7 +63,9 @@ h1 { font-size: 18px; font-weight: 700; }
 </div>
 
 <div class="canvas-wrap">
-  <div id="canvas"></div>
+  <div id="canvas">
+    <div class="divisore" style="left:720px"></div>
+  </div>
 </div>
 
 <div class="stats" id="stats"></div>
@@ -78,38 +81,40 @@ h1 { font-size: 18px; font-weight: 700; }
 const GRID = 20;
 
 const DEFAULT_TAVOLI = [
-  {id:"T1",posti:2,zona:"Sala",x:40,y:80},
-  {id:"T2",posti:2,zona:"Sala",x:180,y:80,nonDisp:true},
-  {id:"T3",posti:4,zona:"Sala",x:320,y:80},
-  {id:"T4",posti:4,zona:"Sala",x:460,y:80},
-  {id:"T5",posti:2,zona:"Sala",x:600,y:80},
-  {id:"T6",posti:4,zona:"Sala",x:740,y:80},
-  {id:"T7",posti:4,zona:"Sala",x:880,y:80},
-  {id:"T8",posti:2,zona:"Sala",x:40,y:220},
-  {id:"T9",posti:4,zona:"Sala",x:180,y:220},
-  {id:"T10",posti:4,zona:"Sala",x:320,y:220},
-  {id:"T11",posti:2,zona:"Sala",x:460,y:220},
-  {id:"T12",posti:4,zona:"Sala",x:600,y:220},
-  {id:"T13",posti:4,zona:"Sala",x:740,y:220},
-  {id:"T15",posti:2,zona:"Sala",x:880,y:220},
-  {id:"T19",posti:4,zona:"Saletta",x:40,y:440},
-  {id:"T20",posti:2,zona:"Saletta",x:180,y:440},
-  {id:"T21",posti:4,zona:"Saletta",x:320,y:440},
-  {id:"T22",posti:4,zona:"Saletta",x:460,y:440},
-  {id:"T23",posti:2,zona:"Saletta",x:600,y:440},
-  {id:"T24",posti:4,zona:"Saletta",x:740,y:440},
-  {id:"T25",posti:4,zona:"Saletta",x:880,y:440},
-  {id:"T26",posti:2,zona:"Saletta",x:40,y:580},
-  {id:"T27",posti:4,zona:"Saletta",x:180,y:580},
-  {id:"T28",posti:4,zona:"Saletta",x:320,y:580},
-  {id:"T29",posti:2,zona:"Saletta",x:460,y:580},
-  {id:"T30",posti:4,zona:"Saletta",x:600,y:580},
-  {id:"T31",posti:4,zona:"Saletta",x:740,y:580},
+  // SALA — sinistra
+  {id:"T1", posti:2,zona:"Sala",x:40, y:80},
+  {id:"T2", posti:2,zona:"Sala",x:180,y:80, nonDisp:true},
+  {id:"T3", posti:4,zona:"Sala",x:320,y:80},
+  {id:"T4", posti:4,zona:"Sala",x:460,y:80},
+  {id:"T5", posti:2,zona:"Sala",x:40, y:220},
+  {id:"T6", posti:4,zona:"Sala",x:180,y:220},
+  {id:"T7", posti:4,zona:"Sala",x:320,y:220},
+  {id:"T8", posti:2,zona:"Sala",x:460,y:220},
+  {id:"T9", posti:4,zona:"Sala",x:40, y:360},
+  {id:"T10",posti:4,zona:"Sala",x:180,y:360},
+  {id:"T11",posti:2,zona:"Sala",x:320,y:360},
+  {id:"T12",posti:4,zona:"Sala",x:460,y:360},
+  {id:"T13",posti:4,zona:"Sala",x:40, y:500},
+  {id:"T15",posti:2,zona:"Sala",x:180,y:500},
+  // SALETTA — destra
+  {id:"T19",posti:4,zona:"Saletta",x:780, y:80},
+  {id:"T20",posti:2,zona:"Saletta",x:920, y:80},
+  {id:"T21",posti:4,zona:"Saletta",x:1060,y:80},
+  {id:"T22",posti:4,zona:"Saletta",x:1200,y:80},
+  {id:"T23",posti:2,zona:"Saletta",x:1340,y:80},
+  {id:"T24",posti:4,zona:"Saletta",x:780, y:220},
+  {id:"T25",posti:4,zona:"Saletta",x:920, y:220},
+  {id:"T26",posti:2,zona:"Saletta",x:1060,y:220},
+  {id:"T27",posti:4,zona:"Saletta",x:1200,y:220},
+  {id:"T28",posti:4,zona:"Saletta",x:1340,y:220},
+  {id:"T29",posti:2,zona:"Saletta",x:780, y:360},
+  {id:"T30",posti:4,zona:"Saletta",x:920, y:360},
+  {id:"T31",posti:4,zona:"Saletta",x:1060,y:360},
 ];
 
 const ZONE_COLORS = {
-  "Sala":    { bg: "#E8F0E8", border: "#4A8A5A", text: "#2A5A2A" },
-  "Saletta": { bg: "#E8EAF0", border: "#4A5A8A", text: "#1A2A6A" },
+  "Sala":    { bg:"#E8F0E8", border:"#4A8A5A", text:"#2A5A2A" },
+  "Saletta": { bg:"#E8EAF0", border:"#4A5A8A", text:"#1A2A6A" },
 };
 
 const STATI_COLORS = {
@@ -119,148 +124,141 @@ const STATI_COLORS = {
 
 let turno = "19:30";
 let editMode = false;
-let tavoli = JSON.parse(localStorage.getItem('metre_tavoli') || 'null') || DEFAULT_TAVOLI;
-let prenotazioni = JSON.parse(localStorage.getItem('metre_pren') || '{}');
+let tavoli = JSON.parse(localStorage.getItem('metre_tavoli')||'null') || DEFAULT_TAVOLI;
+let prenotazioni = JSON.parse(localStorage.getItem('metre_pren')||'{}');
 let dragging = null, dragOffX = 0, dragOffY = 0;
 
-function snap(v) { return Math.round(v / GRID) * GRID; }
+function snap(v){ return Math.round(v/GRID)*GRID; }
 
-function setTurno(t) {
-  turno = t;
-  document.querySelectorAll('.btn-turno').forEach((b,i) => {
+function setTurno(t){
+  turno=t;
+  document.querySelectorAll('.btn-turno').forEach((b,i)=>{
     b.classList.toggle('active',(i===0&&t==='19:30')||(i===1&&t==='21:30'));
   });
   render();
 }
 
-function toggleEdit() {
-  editMode = !editMode;
-  const btn = document.getElementById('btn-edit');
-  const hint = document.getElementById('edit-hint');
-  const saveBtn = document.getElementById('btn-save-layout');
-  btn.textContent = editMode ? '✓ Esci editor' : '✏️ Modifica layout';
-  btn.className = 'btn-tool' + (editMode ? ' edit-mode' : '');
-  hint.style.display = editMode ? 'inline' : 'none';
-  saveBtn.style.display = editMode ? 'inline-block' : 'none';
+function toggleEdit(){
+  editMode=!editMode;
+  const btn=document.getElementById('btn-edit');
+  const hint=document.getElementById('edit-hint');
+  const saveBtn=document.getElementById('btn-save-layout');
+  btn.textContent=editMode?'✓ Esci editor':'✏️ Modifica layout';
+  btn.className='btn-tool'+(editMode?' edit-mode':'');
+  hint.style.display=editMode?'inline':'none';
+  saveBtn.style.display=editMode?'inline-block':'none';
   render();
 }
 
-function saveLayout() {
-  localStorage.setItem('metre_tavoli', JSON.stringify(tavoli));
+function saveLayout(){
+  localStorage.setItem('metre_tavoli',JSON.stringify(tavoli));
   alert('✅ Layout salvato!');
 }
 
-function savePren() {
-  localStorage.setItem('metre_pren', JSON.stringify(prenotazioni));
-}
+function savePren(){ localStorage.setItem('metre_pren',JSON.stringify(prenotazioni)); }
+function getTavoloPren(id){ return prenotazioni[turno]&&prenotazioni[turno][id]; }
 
-function getTavoloPren(id) {
-  return prenotazioni[turno] && prenotazioni[turno][id];
-}
+function render(){
+  const canvas=document.getElementById('canvas');
+  const divisore=canvas.querySelector('.divisore');
+  canvas.innerHTML='';
+  if(divisore) canvas.appendChild(divisore);
 
-function render() {
-  const canvas = document.getElementById('canvas');
-  canvas.innerHTML = '';
-
-  const zone = {};
-  tavoli.forEach(t => {
-    if(!zone[t.zona]) zone[t.zona] = {minX:9999,minY:9999,maxX:0,maxY:0};
-    const z = zone[t.zona];
-    z.minX = Math.min(z.minX, t.x - 20);
-    z.minY = Math.min(z.minY, t.y - 36);
-    z.maxX = Math.max(z.maxX, t.x + 130);
-    z.maxY = Math.max(z.maxY, t.y + 130);
+  const zone={};
+  tavoli.forEach(t=>{
+    if(!zone[t.zona]) zone[t.zona]={minX:9999,minY:9999,maxX:0,maxY:0};
+    const z=zone[t.zona];
+    z.minX=Math.min(z.minX,t.x-20);
+    z.minY=Math.min(z.minY,t.y-36);
+    z.maxX=Math.max(z.maxX,t.x+130);
+    z.maxY=Math.max(z.maxY,t.y+130);
   });
 
-  Object.entries(zone).forEach(([nome, z]) => {
-    const zc = ZONE_COLORS[nome] || {bg:"#F0F0F0",border:"#999",text:"#333"};
-    const bg = document.createElement('div');
-    bg.className = 'zona-bg';
-    bg.style.cssText = `left:${z.minX}px;top:${z.minY}px;width:${z.maxX-z.minX}px;height:${z.maxY-z.minY}px;background:${zc.bg};border-color:${zc.border};`;
+  Object.entries(zone).forEach(([nome,z])=>{
+    const zc=ZONE_COLORS[nome]||{bg:"#F0F0F0",border:"#999",text:"#333"};
+    const bg=document.createElement('div');
+    bg.className='zona-bg';
+    bg.style.cssText=`left:${z.minX}px;top:${z.minY}px;width:${z.maxX-z.minX}px;height:${z.maxY-z.minY}px;background:${zc.bg};border-color:${zc.border};`;
     canvas.appendChild(bg);
-    const lbl = document.createElement('div');
-    lbl.className = 'zona-label-map';
-    lbl.style.cssText = `left:${z.minX+12}px;top:${z.minY+10}px;color:${zc.text};`;
-    lbl.textContent = nome.toUpperCase();
+    const lbl=document.createElement('div');
+    lbl.className='zona-label-map';
+    lbl.style.cssText=`left:${z.minX+12}px;top:${z.minY+10}px;color:${zc.text};`;
+    lbl.textContent=nome.toUpperCase();
     canvas.appendChild(lbl);
   });
 
-  tavoli.forEach(t => {
-    const p = getTavoloPren(t.id);
-    const div = document.createElement('div');
-    let cls = 'tavolo ';
-    if(t.nonDisp) cls += 'non-disp';
-    else if(p) cls += 'occupato';
-    else cls += 'libero';
-    div.className = cls;
-    div.style.cssText = `left:${t.x}px;top:${t.y}px;cursor:${editMode?'grab':'pointer'};`;
-    div.innerHTML = `<span>${t.id}</span><span class="posti">${t.posti}p</span>${p&&!t.nonDisp?`<span class="nome-breve">${p.nome.split(' ')[0]}</span>`:''}`;
+  tavoli.forEach(t=>{
+    const p=getTavoloPren(t.id);
+    const div=document.createElement('div');
+    let cls='tavolo ';
+    if(t.nonDisp) cls+='non-disp';
+    else if(p) cls+='occupato';
+    else cls+='libero';
+    div.className=cls;
+    div.style.cssText=`left:${t.x}px;top:${t.y}px;cursor:${editMode?'grab':'pointer'};`;
+    div.innerHTML=`<span>${t.id}</span><span class="posti">${t.posti}p</span>${p&&!t.nonDisp?`<span class="nome-breve">${p.nome.split(' ')[0]}</span>`:''}`;
 
-    if(editMode) {
-      div.addEventListener('touchstart', e => {
+    if(editMode){
+      div.addEventListener('touchstart',e=>{
+        e.preventDefault(); e.stopPropagation();
+        const touch=e.touches[0];
+        const rect=canvas.getBoundingClientRect();
+        const wrap=canvas.parentElement;
+        dragging=t.id;
+        dragOffX=touch.clientX-rect.left+wrap.scrollLeft-t.x;
+        dragOffY=touch.clientY-rect.top+wrap.scrollTop-t.y;
+      },{passive:false});
+      div.addEventListener('mousedown',e=>{
         e.preventDefault();
-        e.stopPropagation();
-        const touch = e.touches[0];
-        const canvas = document.getElementById('canvas');
-        const rect = canvas.getBoundingClientRect();
-        const wrap = canvas.parentElement;
-        dragging = t.id;
-        dragOffX = touch.clientX - rect.left + wrap.scrollLeft - t.x;
-        dragOffY = touch.clientY - rect.top + wrap.scrollTop - t.y;
-      }, {passive:false});
-      div.addEventListener('mousedown', e => {
-        e.preventDefault();
-        const canvas = document.getElementById('canvas');
-        const rect = canvas.getBoundingClientRect();
-        const wrap = canvas.parentElement;
-        dragging = t.id;
-        dragOffX = e.clientX - rect.left + wrap.scrollLeft - t.x;
-        dragOffY = e.clientY - rect.top + wrap.scrollTop - t.y;
+        const rect=canvas.getBoundingClientRect();
+        const wrap=canvas.parentElement;
+        dragging=t.id;
+        dragOffX=e.clientX-rect.left+wrap.scrollLeft-t.x;
+        dragOffY=e.clientY-rect.top+wrap.scrollTop-t.y;
       });
     } else {
-      div.addEventListener('click', () => openModal(t.id));
+      div.addEventListener('click',()=>openModal(t.id));
     }
     canvas.appendChild(div);
   });
 
-  document.getElementById('canvas').addEventListener('touchmove', e => {
+  canvas.addEventListener('touchmove',e=>{
     if(!dragging) return;
     e.preventDefault();
-    const touch = e.touches[0];
-    const canvas = document.getElementById('canvas');
-    const rect = canvas.getBoundingClientRect();
-    const wrap = canvas.parentElement;
-    const nx = snap(touch.clientX - rect.left + wrap.scrollLeft - dragOffX);
-    const ny = snap(touch.clientY - rect.top + wrap.scrollTop - dragOffY);
-    const tv = tavoli.find(x=>x.id===dragging);
-    tv.x = Math.max(0, Math.min(1280, nx));
-    tv.y = Math.max(0, Math.min(780, ny));
+    const touch=e.touches[0];
+    const rect=canvas.getBoundingClientRect();
+    const wrap=canvas.parentElement;
+    const nx=snap(touch.clientX-rect.left+wrap.scrollLeft-dragOffX);
+    const ny=snap(touch.clientY-rect.top+wrap.scrollTop-dragOffY);
+    const tv=tavoli.find(x=>x.id===dragging);
+    tv.x=Math.max(0,Math.min(1380,nx));
+    tv.y=Math.max(0,Math.min(580,ny));
     render();
-  }, {passive:false});
+  },{passive:false});
 
   renderStats();
 }
 
-document.addEventListener('mouseup', () => dragging = null);
-document.addEventListener('touchend', () => dragging = null);
-document.addEventListener('mousemove', e => {
-  if(!dragging || !editMode) return;
-  const canvas = document.getElementById('canvas');
-  const rect = canvas.getBoundingClientRect();
-  const wrap = canvas.parentElement;
-  const nx = snap(e.clientX - rect.left + wrap.scrollLeft - dragOffX);
-  const ny = snap(e.clientY - rect.top + wrap.scrollTop - dragOffY);
-  const tv = tavoli.find(x=>x.id===dragging);
-  tv.x = Math.max(0, Math.min(1280, nx));
-  tv.y = Math.max(0, Math.min(780, ny));
+document.addEventListener('mouseup',()=>dragging=null);
+document.addEventListener('touchend',()=>dragging=null);
+document.addEventListener('mousemove',e=>{
+  if(!dragging||!editMode) return;
+  const canvas=document.getElementById('canvas');
+  const rect=canvas.getBoundingClientRect();
+  const wrap=canvas.parentElement;
+  const nx=snap(e.clientX-rect.left+wrap.scrollLeft-dragOffX);
+  const ny=snap(e.clientY-rect.top+wrap.scrollTop-dragOffY);
+  const tv=tavoli.find(x=>x.id===dragging);
+  tv.x=Math.max(0,Math.min(1380,nx));
+  tv.y=Math.max(0,Math.min(580,ny));
   render();
 });
 
-function renderStats() {
-  const liberi = tavoli.filter(t=>!t.nonDisp&&!getTavoloPren(t.id)).length;
-  const occupati = tavoli.filter(t=>!t.nonDisp&&getTavoloPren(t.id)).length;
-  const coperti = Object.values(prenotazioni[turno]||{}).reduce((s,p)=>s+(p.coperti||0),0);
-  document.getElementById('stats').innerHTML = `
+function renderStats(){
+  const liberi=tavoli.filter(t=>!t.nonDisp&&!getTavoloPren(t.id)).length;
+  const occupati=tavoli.filter(t=>!t.nonDisp&&getTavoloPren(t.id)).length;
+  const coperti=Object.values(prenotazioni[turno]||{}).reduce((s,p)=>s+(p.coperti||0),0);
+  document.getElementById('stats').innerHTML=`
     <div class="stat"><strong style="color:#42513C">${liberi}</strong> Liberi</div>
     <div class="stat"><strong style="color:#BC5A37">${occupati}</strong> Occupati</div>
     <div class="stat"><strong style="color:#C2913B">${coperti}</strong> Coperti</div>
@@ -268,19 +266,19 @@ function renderStats() {
   `;
 }
 
-function openModal(id) {
+function openModal(id){
   if(editMode) return;
-  const t = tavoli.find(x=>x.id===id);
-  const p = getTavoloPren(id);
-  const title = document.getElementById('modal-title');
-  const body = document.getElementById('modal-body');
-  title.textContent = `${t.id} — ${t.posti}p — ${t.zona}`;
+  const t=tavoli.find(x=>x.id===id);
+  const p=getTavoloPren(id);
+  const title=document.getElementById('modal-title');
+  const body=document.getElementById('modal-body');
+  title.textContent=`${t.id} — ${t.posti}p — ${t.zona}`;
 
-  if(t.nonDisp) {
-    body.innerHTML = `<p style="color:#9A9A9A;margin-bottom:14px">Tavolo non disponibile</p><button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>`;
-  } else if(p) {
-    const c = STATI_COLORS[p.stato]||'#42513C';
-    body.innerHTML = `
+  if(t.nonDisp){
+    body.innerHTML=`<p style="color:#9A9A9A;margin-bottom:14px">Tavolo non disponibile</p><button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>`;
+  } else if(p){
+    const c=STATI_COLORS[p.stato]||'#42513C';
+    body.innerHTML=`
       <span class="badge" style="background:${c}22;color:${c};border:1px solid ${c}44">${p.stato}</span>
       <div class="field"><label>Nome</label><input id="e-nome" value="${p.nome}"></div>
       <div class="field"><label>Coperti</label><input id="e-cop" type="number" value="${p.coperti}"></div>
@@ -295,7 +293,7 @@ function openModal(id) {
         <button class="btn btn-save" onclick="salvaMod('${id}')">Salva</button>
       </div>`;
   } else {
-    body.innerHTML = `
+    body.innerHTML=`
       <div class="field"><label>Nome cliente *</label><input id="n-nome" placeholder="Es. Rossi Mario"></div>
       <div class="field"><label>Coperti *</label><input id="n-cop" type="number" min="1" max="${t.posti+2}" value="${t.posti}"></div>
       <div class="field"><label>Telefono</label><input id="n-tel" placeholder="333 1234567"></div>
@@ -308,21 +306,21 @@ function openModal(id) {
   document.getElementById('modal').classList.add('open');
 }
 
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 
-function prenota(id) {
-  const nome = document.getElementById('n-nome').value.trim();
+function prenota(id){
+  const nome=document.getElementById('n-nome').value.trim();
   if(!nome){alert('Inserisci il nome');return;}
   if(!prenotazioni[turno]) prenotazioni[turno]={};
   prenotazioni[turno][id]={
-    nome, coperti:parseInt(document.getElementById('n-cop').value),
+    nome,coperti:parseInt(document.getElementById('n-cop').value),
     telefono:document.getElementById('n-tel').value,
-    note:document.getElementById('n-note').value, stato:'Prenotato'
+    note:document.getElementById('n-note').value,stato:'Prenotato'
   };
   savePren(); closeModal(); render();
 }
 
-function salvaMod(id) {
+function salvaMod(id){
   prenotazioni[turno][id]={...prenotazioni[turno][id],
     nome:document.getElementById('e-nome').value,
     coperti:parseInt(document.getElementById('e-cop').value),
@@ -333,12 +331,12 @@ function salvaMod(id) {
   savePren(); closeModal(); render();
 }
 
-function liberaTavolo(id) {
+function liberaTavolo(id){
   delete prenotazioni[turno][id];
   savePren(); closeModal(); render();
 }
 
-document.getElementById('modal').addEventListener('click', function(e){
+document.getElementById('modal').addEventListener('click',function(e){
   if(e.target===this) closeModal();
 });
 

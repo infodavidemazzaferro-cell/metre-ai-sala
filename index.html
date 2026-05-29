@@ -64,7 +64,7 @@ h1 { font-size: 18px; font-weight: 700; }
 
 <div class="canvas-wrap">
   <div id="canvas">
-    <div class="divisore" style="left:720px"></div>
+    <div class="divisore" style="left:745px"></div>
   </div>
 </div>
 
@@ -82,31 +82,31 @@ const GRID = 20;
 
 const DEFAULT_TAVOLI = [
   // SALA — sinistra
-  {id:"T1", posti:2,zona:"Sala",x:40, y:80},
-  {id:"T2", posti:2,zona:"Sala",x:180,y:80, nonDisp:true},
-  {id:"T3", posti:4,zona:"Sala",x:320,y:80},
-  {id:"T4", posti:4,zona:"Sala",x:460,y:80},
-  {id:"T5", posti:2,zona:"Sala",x:40, y:220},
-  {id:"T6", posti:4,zona:"Sala",x:180,y:220},
-  {id:"T7", posti:4,zona:"Sala",x:320,y:220},
-  {id:"T8", posti:2,zona:"Sala",x:460,y:220},
-  {id:"T9", posti:4,zona:"Sala",x:40, y:360},
-  {id:"T10",posti:4,zona:"Sala",x:180,y:360},
-  {id:"T11",posti:2,zona:"Sala",x:320,y:360},
-  {id:"T12",posti:4,zona:"Sala",x:460,y:360},
-  {id:"T13",posti:4,zona:"Sala",x:40, y:500},
-  {id:"T15",posti:2,zona:"Sala",x:180,y:500},
+  {id:"T9", posti:4,zona:"Sala",x:40, y:60},
+  {id:"T10",posti:4,zona:"Sala",x:180,y:60},
+  {id:"T11",posti:2,zona:"Sala",x:340,y:60},
+  {id:"T12",posti:4,zona:"Sala",x:450,y:60},
+  {id:"T13",posti:4,zona:"Sala",x:600,y:60},
+  {id:"T8", posti:2,zona:"Sala",x:40, y:200},
+  {id:"T7", posti:4,zona:"Sala",x:250,y:210},
+  {id:"T5", posti:2,zona:"Sala",x:420,y:210},
+  {id:"T15",posti:2,zona:"Sala",x:40, y:340},
+  {id:"T6", posti:4,zona:"Sala",x:250,y:350},
+  {id:"T4", posti:4,zona:"Sala",x:420,y:350},
+  {id:"T1", posti:2,zona:"Sala",x:40, y:490},
+  {id:"T2", posti:2,zona:"Sala",x:250,y:490, nonDisp:true},
+  {id:"T3", posti:4,zona:"Sala",x:360,y:490},
   // SALETTA — destra
-  {id:"T19",posti:4,zona:"Saletta",x:780, y:80},
-  {id:"T20",posti:2,zona:"Saletta",x:920, y:80},
-  {id:"T21",posti:4,zona:"Saletta",x:1060,y:80},
-  {id:"T22",posti:4,zona:"Saletta",x:1200,y:80},
-  {id:"T23",posti:2,zona:"Saletta",x:1340,y:80},
-  {id:"T24",posti:4,zona:"Saletta",x:780, y:220},
-  {id:"T25",posti:4,zona:"Saletta",x:920, y:220},
-  {id:"T26",posti:2,zona:"Saletta",x:1060,y:220},
-  {id:"T27",posti:4,zona:"Saletta",x:1200,y:220},
-  {id:"T28",posti:4,zona:"Saletta",x:1340,y:220},
+  {id:"T19",posti:4,zona:"Saletta",x:780, y:60},
+  {id:"T20",posti:2,zona:"Saletta",x:920, y:60},
+  {id:"T21",posti:4,zona:"Saletta",x:1080,y:60},
+  {id:"T22",posti:4,zona:"Saletta",x:1190,y:60},
+  {id:"T23",posti:2,zona:"Saletta",x:1330,y:60},
+  {id:"T24",posti:4,zona:"Saletta",x:780, y:210},
+  {id:"T25",posti:4,zona:"Saletta",x:920, y:210},
+  {id:"T26",posti:2,zona:"Saletta",x:1060,y:210},
+  {id:"T27",posti:4,zona:"Saletta",x:1200,y:210},
+  {id:"T28",posti:4,zona:"Saletta",x:1340,y:210},
   {id:"T29",posti:2,zona:"Saletta",x:780, y:360},
   {id:"T30",posti:4,zona:"Saletta",x:920, y:360},
   {id:"T31",posti:4,zona:"Saletta",x:1060,y:360},
@@ -124,7 +124,7 @@ const STATI_COLORS = {
 
 let turno = "19:30";
 let editMode = false;
-let tavoli = JSON.parse(localStorage.getItem('metre_tavoli')||'null') || DEFAULT_TAVOLI;
+let tavoli = JSON.parse(localStorage.getItem('metre_tavoli_v2')||'null') || DEFAULT_TAVOLI;
 let prenotazioni = JSON.parse(localStorage.getItem('metre_pren')||'{}');
 let dragging = null, dragOffX = 0, dragOffY = 0;
 
@@ -151,7 +151,7 @@ function toggleEdit(){
 }
 
 function saveLayout(){
-  localStorage.setItem('metre_tavoli',JSON.stringify(tavoli));
+  localStorage.setItem('metre_tavoli_v2',JSON.stringify(tavoli));
   alert('✅ Layout salvato!');
 }
 

@@ -47,8 +47,13 @@ h1 { font-size: 18px; font-weight: 700; }
 .btns { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .btn { flex: 1; padding: 11px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; min-width: 80px; }
 .btn-cancel { background: #DCCDB2; color: #2A2018; }
+.btn-arrivato { background: #4CAF50; color: #fff; }
+.btn:disabled { opacity:.5; cursor:default; }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
 .read-note { font-size:12px; color:#8A7E6C; margin-top:10px; font-style:italic; }
+.modal-msg { font-size:13px; margin-top:10px; min-height:16px; }
+.modal-msg.ok { color:#2E7D32; font-weight:600; }
+.modal-msg.err { color:#BC5A37; font-weight:600; }
 .divisore { position: absolute; top: 40px; bottom: 40px; width: 3px; background: #C8B89A; border-radius: 2px; }
 </style>
 </head>
@@ -91,10 +96,10 @@ h1 { font-size: 18px; font-weight: 700; }
 <script>
 // ====== CONFIG ======
 const WEBHOOK_URL = "https://metreai.app.n8n.cloud/webhook/lettura-mappa";
+const WEBHOOK_SCRIVI = "https://metreai.app.n8n.cloud/webhook/scrivi-stato";
 const GRID = 20;
 
 const DEFAULT_TAVOLI = [
-  // SALA — sinistra
   {id:"T9", posti:4,zona:"Sala",x:40, y:60},
   {id:"T10",posti:4,zona:"Sala",x:180,y:60},
   {id:"T11",posti:2,zona:"Sala",x:340,y:60},
@@ -109,7 +114,6 @@ const DEFAULT_TAVOLI = [
   {id:"T1", posti:2,zona:"Sala",x:40, y:490},
   {id:"T2", posti:2,zona:"Sala",x:250,y:490, nonDisp:true},
   {id:"T3", posti:4,zona:"Sala",x:360,y:490},
-  // SALETTA — destra
   {id:"T19",posti:4,zona:"Saletta",x:780, y:60},
   {id:"T20",posti:2,zona:"Saletta",x:920, y:60},
   {id:"T21",posti:4,zona:"Saletta",x:1080,y:60},
@@ -138,13 +142,11 @@ const STATI_COLORS = {
 let turno = "19:30";
 let editMode = false;
 let tavoli = JSON.parse(localStorage.getItem('metre_tavoli_v2')||'null') || DEFAULT_TAVOLI;
-// prenotazioni ora arriva da Airtable via n8n (niente piu localStorage per le prenotazioni)
-let prenotazioni = {};   // struttura: { "T5": {nome, coperti, stato, ...}, ... }
+let prenotazioni = {};
 let dragging = null, dragOffX = 0, dragOffY = 0;
 
 function snap(v){ return Math.round(v/GRID)*GRID; }
 
-// data di oggi in formato YYYY-MM-DD per il datepicker
 function oggiISO(){
   const d = new Date();
   const m = String(d.getMonth()+1).padStart(2,'0');
@@ -158,7 +160,6 @@ function setStatus(msg, tipo){
   el.className = 'status-bar' + (tipo ? ' '+tipo : '');
 }
 
-// ====== CARICA DATI VERI DA n8n/AIRTABLE ======
 async function caricaPrenotazioni(){
   const data = document.getElementById('datePicker').value;
   if(!data){ return; }
@@ -176,6 +177,19 @@ async function caricaPrenotazioni(){
     setStatus('⚠️ Errore nel caricamento. Tocca 🔄 per riprovare.', 'error');
     console.error(err);
   }
+}
+
+async function scriviStato(id, nuovoStato){
+  const resp = await fetch(WEBHOOK_SCRIVI, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ id, stato: nuovoStato })
+  });
+  if(!resp.ok){
+    const t = await resp.text();
+    throw new Error('HTTP '+resp.status+' — '+t);
+  }
+  return resp.json();
 }
 
 function setTurno(t){
@@ -327,8 +341,9 @@ function openModal(id){
     body.innerHTML=`<p style="color:#9A9A9A;margin-bottom:14px">Tavolo non disponibile</p><button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>`;
   } else if(p){
     const c=STATI_COLORS[p.stato]||'#42513C';
+    const isPrenotato = (p.stato||'').toLowerCase().includes('prenot');
     body.innerHTML=`
-      <span class="badge" style="background:${c}22;color:${c};border:1px solid ${c}44">${p.stato}</span>
+      <span class="badge" id="m-badge" style="background:${c}22;color:${c};border:1px solid ${c}44">${p.stato}</span>
       <div class="info-row"><span class="lbl">Nome</span><span class="val">${p.nome||'—'}</span></div>
       <div class="info-row"><span class="lbl">Coperti</span><span class="val">${p.coperti||'—'}</span></div>
       <div class="info-row"><span class="lbl">Turno</span><span class="val">${p.turno||'—'}</span></div>
@@ -336,8 +351,9 @@ function openModal(id){
       <div class="info-row"><span class="lbl">Note</span><span class="val">${p.note||'—'}</span></div>
       <div class="btns">
         <button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>
+        ${isPrenotato ? `<button class="btn btn-arrivato" id="m-arrivato" onclick="segnaArrivato('${id}')">✓ Arrivato</button>` : ''}
       </div>
-      <p class="read-note">Sola lettura — le modifiche arriveranno nel prossimo step.</p>`;
+      <div class="modal-msg" id="m-msg"></div>`;
   } else {
     body.innerHTML=`
       <p style="color:#42513C;margin-bottom:14px">Tavolo libero per questa data e turno.</p>
@@ -349,17 +365,40 @@ function openModal(id){
   document.getElementById('modal').classList.add('open');
 }
 
+async function segnaArrivato(tavoloId){
+  const p = getTavoloPren(tavoloId);
+  if(!p || !p.id){ return; }
+  const btn = document.getElementById('m-arrivato');
+  const msg = document.getElementById('m-msg');
+  btn.disabled = true;
+  btn.textContent = 'Salvataggio…';
+  msg.className = 'modal-msg';
+  msg.textContent = '';
+  try {
+    await scriviStato(p.id, 'Arrivato');
+    msg.className = 'modal-msg ok';
+    msg.textContent = '✓ Segnato come arrivato';
+    await caricaPrenotazioni();
+    setTimeout(closeModal, 700);
+  } catch(err){
+    btn.disabled = false;
+    btn.textContent = '✓ Arrivato';
+    msg.className = 'modal-msg err';
+    msg.textContent = '⚠️ Errore, riprova';
+    console.error(err);
+  }
+}
+
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 
 document.getElementById('modal').addEventListener('click',function(e){
   if(e.target===this) closeModal();
 });
 
-// ====== AVVIO ======
 document.getElementById('datePicker').value = oggiISO();
 document.getElementById('datePicker').addEventListener('change', caricaPrenotazioni);
-render();                 // disegna subito i tavoli (vuoti)
-caricaPrenotazioni();     // poi carica le prenotazioni vere
+render();
+caricaPrenotazioni();
 </script>
 </body>
 </html>

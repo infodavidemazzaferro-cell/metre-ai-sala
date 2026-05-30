@@ -9,13 +9,19 @@
 body { font-family: system-ui, sans-serif; background: #F4ECDD; color: #2A2018; height: 100vh; display: flex; flex-direction: column; }
 header { background: #2F3A2A; color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
 h1 { font-size: 18px; font-weight: 700; }
+.controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.date-pick { padding: 9px 12px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; font-family: inherit; background: rgba(255,255,255,.92); color: #2A2018; }
 .turni { display: flex; gap: 8px; }
 .btn-turno { background: rgba(255,255,255,.2); color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 .btn-turno.active { background: #C2913B; }
+.btn-refresh { background: rgba(255,255,255,.2); color:#fff; border:none; padding:10px 14px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; }
 .toolbar { background: #FBF6EC; border-bottom: 1px solid #DCCDB2; padding: 10px 18px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap; }
 .btn-tool { background: #2F3A2A; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 .btn-tool.edit-mode { background: #BC5A37; }
 .btn-tool.secondary { background: #DCCDB2; color: #2A2018; }
+.status-bar { font-size: 13px; color: #8A7E6C; margin-left: auto; }
+.status-bar.loading { color: #C2913B; }
+.status-bar.error { color: #BC5A37; font-weight: 600; }
 .canvas-wrap { flex: 1; overflow: auto; position: relative; }
 #canvas { position: relative; width: 1500px; height: 700px; background: #E8DCC8; background-image: radial-gradient(circle, #C8B89A 1px, transparent 1px); background-size: 40px 40px; }
 .zona-bg { position: absolute; border-radius: 14px; border: 2px dashed; opacity: .5; pointer-events: none; }
@@ -23,6 +29,7 @@ h1 { font-size: 18px; font-weight: 700; }
 .tavolo { position: absolute; width: 110px; height: 110px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid; font-size: 15px; font-weight: 800; transition: box-shadow .15s; user-select: none; touch-action: none; }
 .tavolo.libero { background: #D4E4CE; border-color: #42513C; color: #42513C; }
 .tavolo.occupato { background: #F5D5C8; border-color: #BC5A37; color: #BC5A37; }
+.tavolo.arrivato { background: #D6EFD6; border-color: #4CAF50; color: #2E7D32; }
 .tavolo.non-disp { background: #EBEBEB; border-color: #9A9A9A; color: #9A9A9A; }
 .tavolo:active { box-shadow: 0 8px 24px rgba(0,0,0,.3); transform: scale(1.05); }
 .posti { font-size: 12px; font-weight: 400; margin-top: 3px; }
@@ -34,15 +41,14 @@ h1 { font-size: 18px; font-weight: 700; }
 .modal.open { display: flex; }
 .modal-box { background: #FBF6EC; border-radius: 16px; padding: 22px; width: 100%; max-width: 340px; max-height: 90vh; overflow-y: auto; }
 .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
-.field { margin-bottom: 10px; }
-.field label { font-size: 12px; font-weight: 600; color: #42513C; display: block; margin-bottom: 3px; }
-.field input, .field select { width: 100%; padding: 10px 12px; border: 1px solid #DCCDB2; border-radius: 8px; font-size: 15px; font-family: inherit; background: #F4ECDD; }
+.info-row { margin-bottom: 10px; font-size: 14px; }
+.info-row .lbl { font-size: 12px; font-weight: 600; color: #42513C; display: block; margin-bottom: 2px; }
+.info-row .val { font-size: 15px; }
 .btns { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
 .btn { flex: 1; padding: 11px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; min-width: 80px; }
 .btn-cancel { background: #DCCDB2; color: #2A2018; }
-.btn-save { background: #42513C; color: #fff; }
-.btn-free { background: #BC5A37; color: #fff; }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.read-note { font-size:12px; color:#8A7E6C; margin-top:10px; font-style:italic; }
 .divisore { position: absolute; top: 40px; bottom: 40px; width: 3px; background: #C8B89A; border-radius: 2px; }
 </style>
 </head>
@@ -50,9 +56,13 @@ h1 { font-size: 18px; font-weight: 700; }
 
 <header>
   <h1>🍽️ Metre AI — Mappa Sala</h1>
-  <div class="turni">
-    <button class="btn-turno active" onclick="setTurno('19:30')">🕐 1° 19:30</button>
-    <button class="btn-turno" onclick="setTurno('21:30')">🕐 2° 21:30</button>
+  <div class="controls">
+    <input type="date" id="datePicker" class="date-pick">
+    <div class="turni">
+      <button class="btn-turno active" onclick="setTurno('19:30')">🕐 1° 19:30</button>
+      <button class="btn-turno" onclick="setTurno('21:30')">🕐 2° 21:30</button>
+    </div>
+    <button class="btn-refresh" onclick="caricaPrenotazioni()">🔄</button>
   </div>
 </header>
 
@@ -60,6 +70,7 @@ h1 { font-size: 18px; font-weight: 700; }
   <button class="btn-tool" id="btn-edit" onclick="toggleEdit()">✏️ Modifica layout</button>
   <span id="edit-hint" style="font-size:13px;color:#8A7E6C;display:none">✋ Tieni premuto e trascina</span>
   <button class="btn-tool secondary" id="btn-save-layout" onclick="saveLayout()" style="display:none">💾 Salva layout</button>
+  <span class="status-bar" id="statusBar"></span>
 </div>
 
 <div class="canvas-wrap">
@@ -78,6 +89,8 @@ h1 { font-size: 18px; font-weight: 700; }
 </div>
 
 <script>
+// ====== CONFIG ======
+const WEBHOOK_URL = "https://metreai.app.n8n.cloud/webhook/lettura-mappa";
 const GRID = 20;
 
 const DEFAULT_TAVOLI = [
@@ -125,17 +138,52 @@ const STATI_COLORS = {
 let turno = "19:30";
 let editMode = false;
 let tavoli = JSON.parse(localStorage.getItem('metre_tavoli_v2')||'null') || DEFAULT_TAVOLI;
-let prenotazioni = JSON.parse(localStorage.getItem('metre_pren')||'{}');
+// prenotazioni ora arriva da Airtable via n8n (niente piu localStorage per le prenotazioni)
+let prenotazioni = {};   // struttura: { "T5": {nome, coperti, stato, ...}, ... }
 let dragging = null, dragOffX = 0, dragOffY = 0;
 
 function snap(v){ return Math.round(v/GRID)*GRID; }
+
+// data di oggi in formato YYYY-MM-DD per il datepicker
+function oggiISO(){
+  const d = new Date();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const g = String(d.getDate()).padStart(2,'0');
+  return `${d.getFullYear()}-${m}-${g}`;
+}
+
+function setStatus(msg, tipo){
+  const el = document.getElementById('statusBar');
+  el.textContent = msg;
+  el.className = 'status-bar' + (tipo ? ' '+tipo : '');
+}
+
+// ====== CARICA DATI VERI DA n8n/AIRTABLE ======
+async function caricaPrenotazioni(){
+  const data = document.getElementById('datePicker').value;
+  if(!data){ return; }
+  setStatus('Caricamento…', 'loading');
+  try {
+    const url = `${WEBHOOK_URL}?data=${encodeURIComponent(data)}&turno=${encodeURIComponent(turno)}`;
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
+    const json = await resp.json();
+    prenotazioni = json.prenotazioni || {};
+    const n = Object.keys(prenotazioni).length;
+    setStatus(`✓ ${n} prenotazion${n===1?'e':'i'} • aggiornato ${new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`);
+    render();
+  } catch(err){
+    setStatus('⚠️ Errore nel caricamento. Tocca 🔄 per riprovare.', 'error');
+    console.error(err);
+  }
+}
 
 function setTurno(t){
   turno=t;
   document.querySelectorAll('.btn-turno').forEach((b,i)=>{
     b.classList.toggle('active',(i===0&&t==='19:30')||(i===1&&t==='21:30'));
   });
-  render();
+  caricaPrenotazioni();
 }
 
 function toggleEdit(){
@@ -155,8 +203,7 @@ function saveLayout(){
   alert('✅ Layout salvato!');
 }
 
-function savePren(){ localStorage.setItem('metre_pren',JSON.stringify(prenotazioni)); }
-function getTavoloPren(id){ return prenotazioni[turno]&&prenotazioni[turno][id]; }
+function getTavoloPren(id){ return prenotazioni[id]; }
 
 function render(){
   const canvas=document.getElementById('canvas');
@@ -192,11 +239,13 @@ function render(){
     const div=document.createElement('div');
     let cls='tavolo ';
     if(t.nonDisp) cls+='non-disp';
+    else if(p && (p.stato||'').toLowerCase().includes('arriv')) cls+='arrivato';
     else if(p) cls+='occupato';
     else cls+='libero';
     div.className=cls;
     div.style.cssText=`left:${t.x}px;top:${t.y}px;cursor:${editMode?'grab':'pointer'};`;
-    div.innerHTML=`<span>${t.id}</span><span class="posti">${t.posti}p</span>${p&&!t.nonDisp?`<span class="nome-breve">${p.nome.split(' ')[0]}</span>`:''}`;
+    const nomeBreve = (p && p.nome) ? p.nome.split(' ')[0] : '';
+    div.innerHTML=`<span>${t.id}</span><span class="posti">${t.posti}p</span>${p&&!t.nonDisp?`<span class="nome-breve">${nomeBreve}</span>`:''}`;
 
     if(editMode){
       div.addEventListener('touchstart',e=>{
@@ -257,7 +306,7 @@ document.addEventListener('mousemove',e=>{
 function renderStats(){
   const liberi=tavoli.filter(t=>!t.nonDisp&&!getTavoloPren(t.id)).length;
   const occupati=tavoli.filter(t=>!t.nonDisp&&getTavoloPren(t.id)).length;
-  const coperti=Object.values(prenotazioni[turno]||{}).reduce((s,p)=>s+(p.coperti||0),0);
+  const coperti=Object.values(prenotazioni).reduce((s,p)=>s+(p.coperti||0),0);
   document.getElementById('stats').innerHTML=`
     <div class="stat"><strong style="color:#42513C">${liberi}</strong> Liberi</div>
     <div class="stat"><strong style="color:#BC5A37">${occupati}</strong> Occupati</div>
@@ -280,67 +329,37 @@ function openModal(id){
     const c=STATI_COLORS[p.stato]||'#42513C';
     body.innerHTML=`
       <span class="badge" style="background:${c}22;color:${c};border:1px solid ${c}44">${p.stato}</span>
-      <div class="field"><label>Nome</label><input id="e-nome" value="${p.nome}"></div>
-      <div class="field"><label>Coperti</label><input id="e-cop" type="number" value="${p.coperti}"></div>
-      <div class="field"><label>Telefono</label><input id="e-tel" value="${p.telefono||''}"></div>
-      <div class="field"><label>Note</label><input id="e-note" value="${p.note||''}"></div>
-      <div class="field"><label>Stato</label><select id="e-stato">
-        ${['Prenotato','Arrivato','Completato','No-show','Cancellato'].map(s=>`<option${s===p.stato?' selected':''}>${s}</option>`).join('')}
-      </select></div>
+      <div class="info-row"><span class="lbl">Nome</span><span class="val">${p.nome||'—'}</span></div>
+      <div class="info-row"><span class="lbl">Coperti</span><span class="val">${p.coperti||'—'}</span></div>
+      <div class="info-row"><span class="lbl">Turno</span><span class="val">${p.turno||'—'}</span></div>
+      <div class="info-row"><span class="lbl">Telefono</span><span class="val">${p.telefono||'—'}</span></div>
+      <div class="info-row"><span class="lbl">Note</span><span class="val">${p.note||'—'}</span></div>
       <div class="btns">
-        <button class="btn btn-free" onclick="liberaTavolo('${id}')">Libera</button>
-        <button class="btn btn-cancel" onclick="closeModal()">Annulla</button>
-        <button class="btn btn-save" onclick="salvaMod('${id}')">Salva</button>
-      </div>`;
+        <button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>
+      </div>
+      <p class="read-note">Sola lettura — le modifiche arriveranno nel prossimo step.</p>`;
   } else {
     body.innerHTML=`
-      <div class="field"><label>Nome cliente *</label><input id="n-nome" placeholder="Es. Rossi Mario"></div>
-      <div class="field"><label>Coperti *</label><input id="n-cop" type="number" min="1" max="${t.posti+2}" value="${t.posti}"></div>
-      <div class="field"><label>Telefono</label><input id="n-tel" placeholder="333 1234567"></div>
-      <div class="field"><label>Note</label><input id="n-note" placeholder="Allergie, seggiolone..."></div>
+      <p style="color:#42513C;margin-bottom:14px">Tavolo libero per questa data e turno.</p>
       <div class="btns">
-        <button class="btn btn-cancel" onclick="closeModal()">Annulla</button>
-        <button class="btn btn-save" onclick="prenota('${id}')">Prenota</button>
-      </div>`;
+        <button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>
+      </div>
+      <p class="read-note">La prenotazione manuale dalla mappa arriverà nel prossimo step.</p>`;
   }
   document.getElementById('modal').classList.add('open');
 }
 
 function closeModal(){ document.getElementById('modal').classList.remove('open'); }
 
-function prenota(id){
-  const nome=document.getElementById('n-nome').value.trim();
-  if(!nome){alert('Inserisci il nome');return;}
-  if(!prenotazioni[turno]) prenotazioni[turno]={};
-  prenotazioni[turno][id]={
-    nome,coperti:parseInt(document.getElementById('n-cop').value),
-    telefono:document.getElementById('n-tel').value,
-    note:document.getElementById('n-note').value,stato:'Prenotato'
-  };
-  savePren(); closeModal(); render();
-}
-
-function salvaMod(id){
-  prenotazioni[turno][id]={...prenotazioni[turno][id],
-    nome:document.getElementById('e-nome').value,
-    coperti:parseInt(document.getElementById('e-cop').value),
-    telefono:document.getElementById('e-tel').value,
-    note:document.getElementById('e-note').value,
-    stato:document.getElementById('e-stato').value
-  };
-  savePren(); closeModal(); render();
-}
-
-function liberaTavolo(id){
-  delete prenotazioni[turno][id];
-  savePren(); closeModal(); render();
-}
-
 document.getElementById('modal').addEventListener('click',function(e){
   if(e.target===this) closeModal();
 });
 
-render();
+// ====== AVVIO ======
+document.getElementById('datePicker').value = oggiISO();
+document.getElementById('datePicker').addEventListener('change', caricaPrenotazioni);
+render();                 // disegna subito i tavoli (vuoti)
+caricaPrenotazioni();     // poi carica le prenotazioni vere
 </script>
 </body>
 </html>

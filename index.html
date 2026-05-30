@@ -51,6 +51,7 @@ h1 { font-size: 18px; font-weight: 700; }
 .btn { flex: 1; padding: 11px; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; min-width: 80px; }
 .btn-cancel { background: #DCCDB2; color: #2A2018; }
 .btn-arrivato { background: #4CAF50; color: #fff; }
+.btn-sposta { background: #2E5F8A; color: #fff; }
 .btn-save { background: #42513C; color: #fff; }
 .btn:disabled { opacity:.5; cursor:default; }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
@@ -58,6 +59,11 @@ h1 { font-size: 18px; font-weight: 700; }
 .modal-msg { font-size:13px; margin-top:10px; min-height:16px; }
 .modal-msg.ok { color:#2E7D32; font-weight:600; }
 .modal-msg.err { color:#BC5A37; font-weight:600; }
+.sposta-list { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; margin-top:4px; }
+.sposta-item { padding:12px 14px; border-radius:10px; border:1.5px solid #4A8A5A; background:#E8F5E8; cursor:pointer; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+.sposta-item:active { background:#D4E4CE; }
+.sposta-item .zona { font-size:12px; font-weight:400; color:#42513C; }
+.sposta-empty { font-size:14px; color:#8A7E6C; padding:10px 0; }
 .divisore { position: absolute; top: 40px; bottom: 40px; width: 3px; background: #C8B89A; border-radius: 2px; }
 </style>
 </head>
@@ -102,6 +108,7 @@ h1 { font-size: 18px; font-weight: 700; }
 const WEBHOOK_URL = "https://metreai.app.n8n.cloud/webhook/lettura-mappa";
 const WEBHOOK_SCRIVI = "https://metreai.app.n8n.cloud/webhook/scrivi-stato";
 const WEBHOOK_CREA = "https://metreai.app.n8n.cloud/webhook/crea-prenotazione";
+const WEBHOOK_SPOSTA = "https://metreai.app.n8n.cloud/webhook/sposta-tavolo";
 const GRID = 20;
 
 const TURNO_LABEL = {
@@ -191,8 +198,7 @@ async function caricaPrenotazioni(){
 
 async function scriviStato(id, nuovoStato){
   const resp = await fetch(WEBHOOK_SCRIVI, {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json' },
+    method: 'POST', headers: { 'Content-Type':'application/json' },
     body: JSON.stringify({ id, stato: nuovoStato })
   });
   if(!resp.ok){ const t = await resp.text(); throw new Error('HTTP '+resp.status+' — '+t); }
@@ -201,9 +207,17 @@ async function scriviStato(id, nuovoStato){
 
 async function creaPrenotazione(dati){
   const resp = await fetch(WEBHOOK_CREA, {
-    method: 'POST',
-    headers: { 'Content-Type':'application/json' },
+    method: 'POST', headers: { 'Content-Type':'application/json' },
     body: JSON.stringify(dati)
+  });
+  if(!resp.ok){ const t = await resp.text(); throw new Error('HTTP '+resp.status+' — '+t); }
+  return resp.json();
+}
+
+async function spostaTavolo(id, nuovoTavolo){
+  const resp = await fetch(WEBHOOK_SPOSTA, {
+    method: 'POST', headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ id, tavolo: nuovoTavolo })
   });
   if(!resp.ok){ const t = await resp.text(); throw new Error('HTTP '+resp.status+' — '+t); }
   return resp.json();
@@ -369,6 +383,7 @@ function openModal(id){
       <div class="btns">
         <button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>
         ${isPrenotato ? `<button class="btn btn-arrivato" id="m-arrivato" onclick="segnaArrivato('${id}')">✓ Arrivato</button>` : ''}
+        <button class="btn btn-sposta" onclick="apriSposta('${id}')">↔️ Sposta</button>
       </div>
       <div class="modal-msg" id="m-msg"></div>`;
   } else {
@@ -384,6 +399,60 @@ function openModal(id){
       <div class="modal-msg" id="m-msg"></div>`;
   }
   document.getElementById('modal').classList.add('open');
+}
+
+function apriSposta(tavoloId){
+  const p = getTavoloPren(tavoloId);
+  if(!p) return;
+  const coperti = p.coperti || 1;
+  const title=document.getElementById('modal-title');
+  const body=document.getElementById('modal-body');
+  title.textContent = `Sposta ${p.nome||''} (${coperti}p)`;
+
+  // tavoli liberi, non quello attuale, non nonDisp, con posti sufficienti
+  const liberi = tavoli.filter(t =>
+    t.id !== tavoloId &&
+    !t.nonDisp &&
+    !getTavoloPren(t.id) &&
+    t.posti >= coperti
+  );
+
+  let lista = '';
+  if(liberi.length === 0){
+    lista = `<div class="sposta-empty">Nessun tavolo libero adatto per ${coperti} coperti in questo turno.</div>`;
+  } else {
+    lista = `<div class="sposta-list">` + liberi.map(t =>
+      `<div class="sposta-item" onclick="confermaSposta('${p.id}','${t.id}')">
+        <span>${t.id} — ${t.posti}p</span>
+        <span class="zona">${t.zona}</span>
+      </div>`
+    ).join('') + `</div>`;
+  }
+
+  body.innerHTML = `
+    <p style="font-size:13px;color:#8A7E6C;margin-bottom:10px">Scegli il tavolo di destinazione:</p>
+    ${lista}
+    <div class="btns">
+      <button class="btn btn-cancel" onclick="openModal('${tavoloId}')">← Indietro</button>
+    </div>
+    <div class="modal-msg" id="m-msg"></div>`;
+}
+
+async function confermaSposta(prenId, tavoloNuovo){
+  const msg = document.getElementById('m-msg');
+  msg.className = 'modal-msg';
+  msg.textContent = 'Spostamento…';
+  try {
+    await spostaTavolo(prenId, tavoloNuovo);
+    msg.className = 'modal-msg ok';
+    msg.textContent = '✓ Spostato su ' + tavoloNuovo;
+    await caricaPrenotazioni();
+    setTimeout(closeModal, 800);
+  } catch(err){
+    msg.className = 'modal-msg err';
+    msg.textContent = '⚠️ Errore, riprova';
+    console.error(err);
+  }
 }
 
 async function segnaArrivato(tavoloId){
@@ -424,9 +493,7 @@ async function prenotaManuale(tavoloId){
   msg.textContent = '';
   try {
     await creaPrenotazione({
-      nome,
-      coperti,
-      data,
+      nome, coperti, data,
       turno: TURNO_LABEL[turno] || turno,
       tavolo: tavoloId,
       telefono: document.getElementById('n-tel').value.trim(),

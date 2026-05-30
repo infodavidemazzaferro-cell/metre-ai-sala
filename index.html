@@ -397,3 +397,64 @@ async function segnaArrivato(tavoloId){
   msg.textContent = '';
   try {
     await scriviStato(p.id, 'Arrivato');
+    msg.className = 'modal-msg ok';
+    msg.textContent = '✓ Segnato come arrivato';
+    await caricaPrenotazioni();
+    setTimeout(closeModal, 700);
+  } catch(err){
+    btn.disabled = false;
+    btn.textContent = '✓ Arrivato';
+    msg.className = 'modal-msg err';
+    msg.textContent = '⚠️ Errore, riprova';
+    console.error(err);
+  }
+}
+
+async function prenotaManuale(tavoloId){
+  const nome = document.getElementById('n-nome').value.trim();
+  const msg = document.getElementById('m-msg');
+  if(!nome){ msg.className='modal-msg err'; msg.textContent='Inserisci il nome'; return; }
+  const coperti = parseInt(document.getElementById('n-cop').value) || 0;
+  if(!coperti){ msg.className='modal-msg err'; msg.textContent='Inserisci i coperti'; return; }
+  const data = document.getElementById('datePicker').value;
+  const btn = document.getElementById('m-prenota');
+  btn.disabled = true;
+  btn.textContent = 'Salvataggio…';
+  msg.className = 'modal-msg';
+  msg.textContent = '';
+  try {
+    await creaPrenotazione({
+      nome,
+      coperti,
+      data,
+      turno: TURNO_LABEL[turno] || turno,
+      tavolo: tavoloId,
+      telefono: document.getElementById('n-tel').value.trim(),
+      note: document.getElementById('n-note').value.trim()
+    });
+    msg.className = 'modal-msg ok';
+    msg.textContent = '✓ Prenotazione creata';
+    await caricaPrenotazioni();
+    setTimeout(closeModal, 700);
+  } catch(err){
+    btn.disabled = false;
+    btn.textContent = 'Prenota';
+    msg.className = 'modal-msg err';
+    msg.textContent = '⚠️ Errore, riprova';
+    console.error(err);
+  }
+}
+
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+document.getElementById('modal').addEventListener('click',function(e){
+  if(e.target===this) closeModal();
+});
+
+document.getElementById('datePicker').value = oggiISO();
+document.getElementById('datePicker').addEventListener('change', caricaPrenotazioni);
+render();
+caricaPrenotazioni();
+</script>
+</body>
+</html>

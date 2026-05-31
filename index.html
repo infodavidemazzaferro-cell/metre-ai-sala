@@ -108,7 +108,6 @@ h1 { font-size: 18px; font-weight: 700; }
 </div>
 
 <script>
-// ====== CONFIG ======
 const WEBHOOK_URL = "https://metreai.app.n8n.cloud/webhook/lettura-mappa";
 const WEBHOOK_SCRIVI = "https://metreai.app.n8n.cloud/webhook/scrivi-stato";
 const WEBHOOK_CREA = "https://metreai.app.n8n.cloud/webhook/crea-prenotazione";
@@ -157,7 +156,7 @@ const ZONE_COLORS = {
 
 const STATI_COLORS = {
   "Prenotato":"#2E5F8A","Arrivato":"#4CAF50",
-  "Completato":"#42513C","No-show":"#9A9A9A","Cancellato":"#BC5A37"
+  "Completato":"#42513C","No-show":"#9A9A9A","cancellato":"#BC5A37"
 };
 
 let turno = "19:30";
@@ -181,14 +180,10 @@ function setStatus(msg, tipo){
   el.className = 'status-bar' + (tipo ? ' '+tipo : '');
 }
 
-// adatta la mappa allo schermo (modalità servizio)
 function fitCanvas(){
   const wrap = document.getElementById('canvasWrap');
   const canvas = document.getElementById('canvas');
-  if(editMode){
-    canvas.style.transform = 'none';
-    return;
-  }
+  if(editMode){ canvas.style.transform = 'none'; return; }
   const padding = 20;
   const sx = (wrap.clientWidth - padding) / 1500;
   const sy = (wrap.clientHeight - padding) / 700;
@@ -528,7 +523,7 @@ async function confermaCancella(tavoloId){
   const msg = document.getElementById('m-msg');
   msg.className = 'modal-msg'; msg.textContent = 'Cancellazione…';
   try {
-    await scriviStato(p.id, 'Cancellato');
+    await scriviStato(p.id, 'cancellato');
     msg.className = 'modal-msg ok'; msg.textContent = '✓ Prenotazione cancellata';
     await caricaPrenotazioni();
     setTimeout(closeModal, 700);

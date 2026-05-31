@@ -6,7 +6,7 @@
 <title>Metre AI — Mappa Sala</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, sans-serif; background: #F4ECDD; color: #2A2018; height: 100vh; display: flex; flex-direction: column; }
+body { font-family: system-ui, sans-serif; background: #F4ECDD; color: #2A2018; height: 100vh; display: flex; flex-direction: column; overflow:hidden; }
 header { background: #2F3A2A; color: #fff; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; flex-shrink: 0; }
 h1 { font-size: 18px; font-weight: 700; }
 .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -22,8 +22,9 @@ h1 { font-size: 18px; font-weight: 700; }
 .status-bar { font-size: 13px; color: #8A7E6C; margin-left: auto; }
 .status-bar.loading { color: #C2913B; }
 .status-bar.error { color: #BC5A37; font-weight: 600; }
-.canvas-wrap { flex: 1; overflow: auto; position: relative; }
-#canvas { position: relative; width: 1500px; height: 700px; background: #E8DCC8; background-image: radial-gradient(circle, #C8B89A 1px, transparent 1px); background-size: 40px 40px; }
+.canvas-wrap { flex: 1; overflow: hidden; position: relative; }
+.canvas-wrap.edit { overflow: auto; }
+#canvas { position: relative; width: 1500px; height: 700px; background: #E8DCC8; background-image: radial-gradient(circle, #C8B89A 1px, transparent 1px); background-size: 40px 40px; transform-origin: top left; }
 .zona-bg { position: absolute; border-radius: 14px; border: 2px dashed; opacity: .5; pointer-events: none; }
 .zona-label-map { position: absolute; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; opacity: .8; pointer-events: none; }
 .tavolo { position: absolute; width: 110px; height: 110px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 3px solid; font-size: 15px; font-weight: 800; transition: box-shadow .15s; user-select: none; touch-action: none; }
@@ -52,13 +53,16 @@ h1 { font-size: 18px; font-weight: 700; }
 .btn-cancel { background: #DCCDB2; color: #2A2018; }
 .btn-arrivato { background: #4CAF50; color: #fff; }
 .btn-sposta { background: #2E5F8A; color: #fff; }
+.btn-concluso { background: #42513C; color: #fff; }
+.btn-cancella { background: #BC5A37; color: #fff; }
 .btn-save { background: #42513C; color: #fff; }
 .btn:disabled { opacity:.5; cursor:default; }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
-.read-note { font-size:12px; color:#8A7E6C; margin-top:10px; font-style:italic; }
 .modal-msg { font-size:13px; margin-top:10px; min-height:16px; }
 .modal-msg.ok { color:#2E7D32; font-weight:600; }
 .modal-msg.err { color:#BC5A37; font-weight:600; }
+.conferma-box { background:#FBE9E3; border:1px solid #BC5A37; border-radius:10px; padding:12px; margin-top:10px; }
+.conferma-box p { font-size:14px; color:#8A3A1F; margin-bottom:10px; }
 .sposta-list { display:flex; flex-direction:column; gap:8px; max-height:300px; overflow-y:auto; margin-top:4px; }
 .sposta-item { padding:12px 14px; border-radius:10px; border:1.5px solid #4A8A5A; background:#E8F5E8; cursor:pointer; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
 .sposta-item:active { background:#D4E4CE; }
@@ -88,7 +92,7 @@ h1 { font-size: 18px; font-weight: 700; }
   <span class="status-bar" id="statusBar"></span>
 </div>
 
-<div class="canvas-wrap">
+<div class="canvas-wrap" id="canvasWrap">
   <div id="canvas">
     <div class="divisore" style="left:745px"></div>
   </div>
@@ -177,6 +181,21 @@ function setStatus(msg, tipo){
   el.className = 'status-bar' + (tipo ? ' '+tipo : '');
 }
 
+// adatta la mappa allo schermo (modalità servizio)
+function fitCanvas(){
+  const wrap = document.getElementById('canvasWrap');
+  const canvas = document.getElementById('canvas');
+  if(editMode){
+    canvas.style.transform = 'none';
+    return;
+  }
+  const padding = 20;
+  const sx = (wrap.clientWidth - padding) / 1500;
+  const sy = (wrap.clientHeight - padding) / 700;
+  const scale = Math.min(sx, sy, 1.2);
+  canvas.style.transform = `scale(${scale})`;
+}
+
 async function caricaPrenotazioni(){
   const data = document.getElementById('datePicker').value;
   if(!data){ return; }
@@ -236,10 +255,13 @@ function toggleEdit(){
   const btn=document.getElementById('btn-edit');
   const hint=document.getElementById('edit-hint');
   const saveBtn=document.getElementById('btn-save-layout');
+  const wrap=document.getElementById('canvasWrap');
   btn.textContent=editMode?'✓ Esci editor':'✏️ Modifica layout';
   btn.className='btn-tool'+(editMode?' edit-mode':'');
   hint.style.display=editMode?'inline':'none';
   saveBtn.style.display=editMode?'inline-block':'none';
+  wrap.classList.toggle('edit', editMode);
+  fitCanvas();
   render();
 }
 
@@ -348,6 +370,8 @@ document.addEventListener('mousemove',e=>{
   render();
 });
 
+window.addEventListener('resize', fitCanvas);
+
 function renderStats(){
   const liberi=tavoli.filter(t=>!t.nonDisp&&!getTavoloPren(t.id)).length;
   const occupati=tavoli.filter(t=>!t.nonDisp&&getTavoloPren(t.id)).length;
@@ -381,9 +405,15 @@ function openModal(id){
       <div class="info-row"><span class="lbl">Telefono</span><span class="val">${p.telefono||'—'}</span></div>
       <div class="info-row"><span class="lbl">Note</span><span class="val">${p.note||'—'}</span></div>
       <div class="btns">
-        <button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>
         ${isPrenotato ? `<button class="btn btn-arrivato" id="m-arrivato" onclick="segnaArrivato('${id}')">✓ Arrivato</button>` : ''}
         <button class="btn btn-sposta" onclick="apriSposta('${id}')">↔️ Sposta</button>
+      </div>
+      <div class="btns">
+        <button class="btn btn-concluso" onclick="segnaConcluso('${id}')">✅ Concluso</button>
+        <button class="btn btn-cancella" onclick="chiediCancella('${id}')">🗑 Cancella</button>
+      </div>
+      <div class="btns">
+        <button class="btn btn-cancel" onclick="closeModal()">Chiudi</button>
       </div>
       <div class="modal-msg" id="m-msg"></div>`;
   } else {
@@ -408,49 +438,36 @@ function apriSposta(tavoloId){
   const title=document.getElementById('modal-title');
   const body=document.getElementById('modal-body');
   title.textContent = `Sposta ${p.nome||''} (${coperti}p)`;
-
-  // tavoli liberi, non quello attuale, non nonDisp, con posti sufficienti
   const liberi = tavoli.filter(t =>
-    t.id !== tavoloId &&
-    !t.nonDisp &&
-    !getTavoloPren(t.id) &&
-    t.posti >= coperti
+    t.id !== tavoloId && !t.nonDisp && !getTavoloPren(t.id) && t.posti >= coperti
   );
-
   let lista = '';
   if(liberi.length === 0){
     lista = `<div class="sposta-empty">Nessun tavolo libero adatto per ${coperti} coperti in questo turno.</div>`;
   } else {
     lista = `<div class="sposta-list">` + liberi.map(t =>
       `<div class="sposta-item" onclick="confermaSposta('${p.id}','${t.id}')">
-        <span>${t.id} — ${t.posti}p</span>
-        <span class="zona">${t.zona}</span>
+        <span>${t.id} — ${t.posti}p</span><span class="zona">${t.zona}</span>
       </div>`
     ).join('') + `</div>`;
   }
-
   body.innerHTML = `
     <p style="font-size:13px;color:#8A7E6C;margin-bottom:10px">Scegli il tavolo di destinazione:</p>
     ${lista}
-    <div class="btns">
-      <button class="btn btn-cancel" onclick="openModal('${tavoloId}')">← Indietro</button>
-    </div>
+    <div class="btns"><button class="btn btn-cancel" onclick="openModal('${tavoloId}')">← Indietro</button></div>
     <div class="modal-msg" id="m-msg"></div>`;
 }
 
 async function confermaSposta(prenId, tavoloNuovo){
   const msg = document.getElementById('m-msg');
-  msg.className = 'modal-msg';
-  msg.textContent = 'Spostamento…';
+  msg.className = 'modal-msg'; msg.textContent = 'Spostamento…';
   try {
     await spostaTavolo(prenId, tavoloNuovo);
-    msg.className = 'modal-msg ok';
-    msg.textContent = '✓ Spostato su ' + tavoloNuovo;
+    msg.className = 'modal-msg ok'; msg.textContent = '✓ Spostato su ' + tavoloNuovo;
     await caricaPrenotazioni();
     setTimeout(closeModal, 800);
   } catch(err){
-    msg.className = 'modal-msg err';
-    msg.textContent = '⚠️ Errore, riprova';
+    msg.className = 'modal-msg err'; msg.textContent = '⚠️ Errore, riprova';
     console.error(err);
   }
 }
@@ -460,21 +477,63 @@ async function segnaArrivato(tavoloId){
   if(!p || !p.id){ return; }
   const btn = document.getElementById('m-arrivato');
   const msg = document.getElementById('m-msg');
-  btn.disabled = true;
-  btn.textContent = 'Salvataggio…';
-  msg.className = 'modal-msg';
-  msg.textContent = '';
+  btn.disabled = true; btn.textContent = 'Salvataggio…';
+  msg.className = 'modal-msg'; msg.textContent = '';
   try {
     await scriviStato(p.id, 'Arrivato');
-    msg.className = 'modal-msg ok';
-    msg.textContent = '✓ Segnato come arrivato';
+    msg.className = 'modal-msg ok'; msg.textContent = '✓ Segnato come arrivato';
     await caricaPrenotazioni();
     setTimeout(closeModal, 700);
   } catch(err){
-    btn.disabled = false;
-    btn.textContent = '✓ Arrivato';
-    msg.className = 'modal-msg err';
-    msg.textContent = '⚠️ Errore, riprova';
+    btn.disabled = false; btn.textContent = '✓ Arrivato';
+    msg.className = 'modal-msg err'; msg.textContent = '⚠️ Errore, riprova';
+    console.error(err);
+  }
+}
+
+async function segnaConcluso(tavoloId){
+  const p = getTavoloPren(tavoloId);
+  if(!p || !p.id){ return; }
+  const msg = document.getElementById('m-msg');
+  msg.className = 'modal-msg'; msg.textContent = 'Salvataggio…';
+  try {
+    await scriviStato(p.id, 'Completato');
+    msg.className = 'modal-msg ok'; msg.textContent = '✓ Tavolo concluso';
+    await caricaPrenotazioni();
+    setTimeout(closeModal, 700);
+  } catch(err){
+    msg.className = 'modal-msg err'; msg.textContent = '⚠️ Errore, riprova';
+    console.error(err);
+  }
+}
+
+function chiediCancella(tavoloId){
+  const p = getTavoloPren(tavoloId);
+  if(!p) return;
+  const body=document.getElementById('modal-body');
+  body.innerHTML = `
+    <div class="conferma-box">
+      <p>Vuoi davvero cancellare la prenotazione di <strong>${p.nome||'questo cliente'}</strong>? L'azione libera il tavolo.</p>
+      <div class="btns">
+        <button class="btn btn-cancel" onclick="openModal('${tavoloId}')">No, torna</button>
+        <button class="btn btn-cancella" onclick="confermaCancella('${tavoloId}')">Sì, cancella</button>
+      </div>
+    </div>
+    <div class="modal-msg" id="m-msg"></div>`;
+}
+
+async function confermaCancella(tavoloId){
+  const p = getTavoloPren(tavoloId);
+  if(!p || !p.id){ return; }
+  const msg = document.getElementById('m-msg');
+  msg.className = 'modal-msg'; msg.textContent = 'Cancellazione…';
+  try {
+    await scriviStato(p.id, 'Cancellato');
+    msg.className = 'modal-msg ok'; msg.textContent = '✓ Prenotazione cancellata';
+    await caricaPrenotazioni();
+    setTimeout(closeModal, 700);
+  } catch(err){
+    msg.className = 'modal-msg err'; msg.textContent = '⚠️ Errore, riprova';
     console.error(err);
   }
 }
@@ -487,10 +546,8 @@ async function prenotaManuale(tavoloId){
   if(!coperti){ msg.className='modal-msg err'; msg.textContent='Inserisci i coperti'; return; }
   const data = document.getElementById('datePicker').value;
   const btn = document.getElementById('m-prenota');
-  btn.disabled = true;
-  btn.textContent = 'Salvataggio…';
-  msg.className = 'modal-msg';
-  msg.textContent = '';
+  btn.disabled = true; btn.textContent = 'Salvataggio…';
+  msg.className = 'modal-msg'; msg.textContent = '';
   try {
     await creaPrenotazione({
       nome, coperti, data,
@@ -499,15 +556,12 @@ async function prenotaManuale(tavoloId){
       telefono: document.getElementById('n-tel').value.trim(),
       note: document.getElementById('n-note').value.trim()
     });
-    msg.className = 'modal-msg ok';
-    msg.textContent = '✓ Prenotazione creata';
+    msg.className = 'modal-msg ok'; msg.textContent = '✓ Prenotazione creata';
     await caricaPrenotazioni();
     setTimeout(closeModal, 700);
   } catch(err){
-    btn.disabled = false;
-    btn.textContent = 'Prenota';
-    msg.className = 'modal-msg err';
-    msg.textContent = '⚠️ Errore, riprova';
+    btn.disabled = false; btn.textContent = 'Prenota';
+    msg.className = 'modal-msg err'; msg.textContent = '⚠️ Errore, riprova';
     console.error(err);
   }
 }
@@ -520,6 +574,7 @@ document.getElementById('modal').addEventListener('click',function(e){
 
 document.getElementById('datePicker').value = oggiISO();
 document.getElementById('datePicker').addEventListener('change', caricaPrenotazioni);
+fitCanvas();
 render();
 caricaPrenotazioni();
 </script>
